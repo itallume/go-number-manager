@@ -11,32 +11,42 @@ func main(){
 	
 	for{
 		var option int
-		fmt.Println("Menu de escolha: ")
+		fmt.Println("\nMenu de escolha: ")
 		fmt.Println(
-			"1) Adicionar um números" +
-			"2) Listar números" +
-			"3) Remover um número" +
-			"4) Estatísticas " +
-			"5) Divisão entre 2 números" +
-			"6) Limpar lista" +
+			"1) Adicionar um números\n" +
+			"2) Listar números\n" +
+			"3) Remover um número\n" +
+			"4) Estatísticas\n" +
+			"5) Divisão entre 2 números\n" +
+			"6) Limpar lista\n" +
 			"0) sair")
 		fmt.Print("Escolha uma das opções acima (entre 0 e 6): ")
-		fmt.Scan(&option)
+		fmt.Scanln(&option)
 		
 		switch option{
+		case 0:
+			fmt.Println("\n\nTchau :(")
+			return
 		case 1:
-
-
+			fmt.Print("Digite um numero inteiro: ")
+			fmt.Scanln(&number)
+			numbers = addNumber(numbers, number)
+		case 2:
+			fmt.Println(numbers)
+		case 3:
+			fmt.Println("desenvolvimento")
+		case 4:
+			fmt.Println("desenvolvimento")
+		case 5:
+			fmt.Println("desenvolvimento")
+		case 6:
+			numbers = []int{}
+		default:
+			fmt.Println("Opção invalida!")
 		}
-		fmt.Print("Digite um numero inteiro: ")
-		fmt.Scanln(&number)
-		numbers = append(numbers, number)
-
 	}
+}
 
-	func addNumber(number int, numbers *[]int)  {
-		
-	}
-	
-	fmt.Print(numbers)
+func addNumber(numbers []int, number int) []int {
+		return append(numbers, number)
 }
