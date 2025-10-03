@@ -2,16 +2,21 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 )
 
+func readInt(prompt string) (int, error) {
+	fmt.Print(prompt)
+	var input string
+	fmt.Scanln(&input)
+	return strconv.Atoi(input)
+}
+
 func main() {
-	var number int
 	var numbers = []int{}
 	fmt.Println("===== Bem vindo(a) ao Gerenciador de Números 2000 ====")
 
 	for {
-		var option int
-		var err error
 		fmt.Println("\nMenu de escolha: ")
 		fmt.Println(
 			"1) Adicionar um número\n" +
@@ -21,51 +26,29 @@ func main() {
 				"5) Divisão entre 2 números\n" +
 				"6) Limpar lista\n" +
 				"0) sair")
-		fmt.Print("Escolha uma das opções acima (entre 0 e 6): ")
-		fmt.Scanln(&option)
+
+		option, err := readInt("Escolha uma das opções acima (entre 0 e 6): ")
+
+		if err != nil {
+			fmt.Println("\nDigite um valor válido!")
+			continue
+		}
 		println()
 
 		switch option {
 		case 0:
-			fmt.Println("\n\nTchau :(")
+			fmt.Println("\n\nTchau...        :(")
 			return
 		case 1:
-			fmt.Print("Digite um numero inteiro: ")
-			fmt.Scanln(&number)
-			numbers = addNumber(numbers, number)
+			hanfleAddNumber(&numbers)
 		case 2:
 			fmt.Println(numbers)
 		case 3:
-			var index int
-			var removedNumber int
-			fmt.Print("Digite um índice para remover: ")
-			fmt.Scanln(&index)
-			numbers, removedNumber, err = removeNumber(numbers, index)
-
-			if err != nil {
-				fmt.Println(err.Error())
-			} else {
-				fmt.Println("Número", removedNumber, "removido com sucesso!")
-			}
+			handleRemove(&numbers)
 		case 4:
-			var min int
-			var max int
-			var avg float64
-			min, max, avg, err = getNumbersStatistics(numbers)
-			if err != nil {
-				fmt.Println(err.Error())
-			}
-			fmt.Println("Mínimo:", min, "\nMáximo:", max, "\nMédia:", avg)
+			handleStatistics(&numbers)
 		case 5:
-			var divider float64
-			var dividend float64
-			var result float64
-			fmt.Println("Digite os numeros para a divisão:")
-			fmt.Print("Divisor: ")
-			fmt.Scanln(&divider)
-			fmt.Print("Dividendo: ")
-			fmt.Scanln(&dividend)
-			result, err = division(divider, dividend)
+			handleDivision()
 		case 6:
 			numbers = []int{}
 		default:
@@ -74,23 +57,87 @@ func main() {
 	}
 }
 
-func addNumber(numbers []int, number int) []int {
-	return append(numbers, number)
-}
-
-func removeNumber(numbers []int, index int) ([]int, int, error) {
-	if index < 0 || index >= len(numbers) {
-		return numbers, 0, fmt.Errorf("Índice inválido.")
+func hanfleAddNumber(numbers *[]int) {
+	number, err := readInt("Digite um numero inteiro: ")
+	if err != nil {
+		fmt.Println("Digite um valor válido!")
+		return
 	}
-	removedNumber := numbers[index]
-	return append(numbers[:index], numbers[index+1:]...), removedNumber, nil
+	addNumber(numbers, number)
 }
 
-func getNumbersStatistics(numbers []int) (int, int, float64, error) {
-	if len(numbers) == 0 {
+func handleRemove(numbers *[]int) {
+	var index int
+	var removedNumber int
+	index, err := readInt("Digite um índice para remover: ")
+	if err != nil {
+		fmt.Println("Valor inválido")
+		return
+	}
+	removedNumber, err = removeNumber(numbers, index)
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		fmt.Println("Número", removedNumber, "removido com sucesso!")
+	}
+}
+
+func handleStatistics(numbers *[]int) {
+	min, max, avg, err := getNumbersStatistics(numbers)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	fmt.Println("Mínimo:", min, "\nMáximo:", max, "\nMédia:", avg)
+}
+
+func handleDivision() {
+	var result float64
+	fmt.Println("Digite os numeros para a divisão:")
+	dividend, err := readFloat("Dividendo: ")
+	if err != nil {
+		fmt.Println("Valor inválido!")
+		return
+	}
+	divider, err := readFloat("Divisor: ")
+	if err != nil {
+		fmt.Println("Valor inválido!")
+		return
+	}
+	result, err = division(dividend, divider)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	fmt.Println(dividend, "dividido por", divider, "é:", result)
+}
+
+func readFloat(prompt string) (float64, error) {
+	fmt.Print(prompt)
+	var input string
+	fmt.Scanln(&input)
+	return strconv.ParseFloat(input, 64)
+}
+
+func addNumber(numbers *[]int, number int) {
+	*numbers = append(*numbers, number)
+}
+
+func removeNumber(numbers *[]int, index int) (int, error) {
+	if index < 0 || index >= len(*numbers) {
+		return 0, fmt.Errorf("Índice inválido.")
+	}
+	s := *numbers
+	removedNumber := s[index]
+	*numbers = append(s[:index], s[index+1:]...)
+	return removedNumber, nil
+}
+
+func getNumbersStatistics(numbers *[]int) (int, int, float64, error) {
+	if len(*numbers) == 0 {
 		return 0, 0, 0.0, fmt.Errorf("Insira números para Calcular as estatísticas.")
 	}
-	return getMin(numbers), getMax(numbers), getAverage(numbers), nil
+	return getMin(*numbers), getMax(*numbers), getAverage(*numbers), nil
 }
 
 func getMin(numbers []int) int {
@@ -121,10 +168,9 @@ func getAverage(numbers []int) float64 {
 	return float64(sum) / float64(len(numbers))
 }
 
-func division(divider float64, dividend float64) (float64, error) {
-
+func division(dividend float64, divider float64) (float64, error) {
 	if divider == 0 {
-		return 0.0, fmt.Errorf("Divisor não pode ser 0")
+		return 0, fmt.Errorf("Divisor não pode ser 0")
 	}
-	return divider / dividend, nil
+	return dividend / divider, nil
 }
